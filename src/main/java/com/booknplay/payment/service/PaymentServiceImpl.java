@@ -24,7 +24,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponse processPayment(PaymentRequest request) {
-        // Create payment with PENDING status
         Payment payment = Payment.builder()
                 .bookingId(request.getBookingId())
                 .amount(request.getAmount())
@@ -33,13 +32,11 @@ public class PaymentServiceImpl implements PaymentService {
                 .createdAt(LocalDateTime.now())
                 .build();
         payment = paymentRepository.save(payment);
-        // Simulate payment failure
         if (Boolean.FALSE.equals(request.getSimulateSuccess())) {
             payment.setPaymentStatus(PaymentStatus.FAILED);
             payment = paymentRepository.save(payment);
             return buildPaymentResponse(payment);
         }
-        // Simulate payment success and confirm booking
         try {
             bookingClient.confirmBooking(payment.getBookingId());
             payment.setPaymentStatus(PaymentStatus.SUCCESS);
